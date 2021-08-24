@@ -21,6 +21,8 @@ const makeSut = (): SutTypes => {
 describe('FacebookAuthenticationService', () => {
   let loadFacebookUserApi: MockProxy<LoadFacebookUserApi>
   let sut: FacebookAuthenticationService
+  const token = 'any_token'
+
   beforeEach(() => {
     loadFacebookUserApi = mock<LoadFacebookUserApi>()
     sut = new FacebookAuthenticationService(loadFacebookUserApi)
@@ -33,16 +35,16 @@ describe('FacebookAuthenticationService', () => {
     }
     const { sut, loadFacebookUserApi } = makeSut()
     */
-    await sut.exec({ token: 'any_token' })
+    await sut.exec({ token })
 
-    expect(loadFacebookUserApi.loadUser).toHaveBeenCalledWith({ token: 'any_token' })
+    expect(loadFacebookUserApi.loadUser).toHaveBeenCalledWith({ token })
     expect(loadFacebookUserApi.loadUser).toHaveBeenCalledTimes(1)
   })
 
   it('should return AuthenticationError when LoadFacebookUserApi returns undefined', async () => {
     loadFacebookUserApi.loadUser.mockResolvedValueOnce(undefined)
 
-    const authResult = await sut.exec({ token: 'any_token' })
+    const authResult = await sut.exec({ token })
 
     expect(authResult).toEqual(new AuthenticationError())
   })
