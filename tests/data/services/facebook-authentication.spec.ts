@@ -1,5 +1,6 @@
 import { AuthenticationError } from '@/domain/errors'
 import { FacebookAccount } from '@/domain/models'
+import { TokenGenerator } from '@/data/contracts/crypto'
 import { FacebookAuthenticationService } from '@/data/services/'
 import { LoadUserAccountRepository, SaveFacebookUserAccountRepository } from '@/data/contracts/repos'
 import { LoadFacebookUserApi } from '@/data/contracts/apis'
@@ -25,6 +26,7 @@ const makeSut = (): SutTypes => {
 jest.mock('@/domain/models/facebook-account')
 
 describe('FacebookAuthenticationService', () => {
+  let tokenGenerator: MockProxy<TokenGenerator>
   let saveFacebookUserAccountRepository: MockProxy<SaveFacebookUserAccountRepository>
   let loadUserAccountRepository: MockProxy<LoadUserAccountRepository>
   let loadFacebookUserApi: MockProxy<LoadFacebookUserApi>
@@ -32,6 +34,7 @@ describe('FacebookAuthenticationService', () => {
   const token = 'any_token'
 
   beforeEach(() => {
+    tokenGenerator = mock<TokenGenerator>()
     saveFacebookUserAccountRepository = mock<SaveFacebookUserAccountRepository>()
     loadUserAccountRepository = mock<LoadUserAccountRepository>()
     loadFacebookUserApi = mock<LoadFacebookUserApi>()
@@ -40,7 +43,10 @@ describe('FacebookAuthenticationService', () => {
       email: 'any_fb_email',
       facebookId: 'any_fb_id'
     })
-    sut = new FacebookAuthenticationService(loadFacebookUserApi, loadUserAccountRepository, saveFacebookUserAccountRepository)
+    saveFacebookUserAccountRepository.saveWithFacebook.mockResolvedValue({
+      id: 'any_account_id'
+    })
+    sut = new FacebookAuthenticationService(loadFacebookUserApi, loadUserAccountRepository, saveFacebookUserAccountRepository, tokenGenerator)
   })
 
   it('should call LoadFacebookUserApi with correct parameters', async () => {
@@ -83,5 +89,16 @@ describe('FacebookAuthenticationService', () => {
 
     expect(saveFacebookUserAccountRepository.saveWithFacebook).toHaveBeenCalledWith({ any: 'any' })
     expect(saveFacebookUserAccountRepository.saveWithFacebook).toHaveBeenCalledTimes(1)
+  })
+
+  it('shout call TokenGenerator with correct params', async () => {
+    loadUserAccountRepository.load.mockResolvedValueOnce(undefined)
+
+    await sut.exec({ token })
+
+    expect(tokenGenerator.generate).toHaveBeenCalledWith({
+      key: 'any_account_id'
+    })
+    expect(tokenGenerator.generate).toHaveBeenCalledTimes(1)
   })
 })
