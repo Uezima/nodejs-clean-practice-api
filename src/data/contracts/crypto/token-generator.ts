@@ -1,12 +1,12 @@
-import { AccessToken } from '@/domain/models'
-
 namespace TokenGenerator {
   export type Params = {
     key: string
     expirationInMs: number
   }
+
+  export type Result = string
 }
 
 export interface TokenGenerator {
-  generate: (params: TokenGenerator.Params) => Promise<AccessToken>
+  generate: (params: TokenGenerator.Params) => Promise<TokenGenerator.Result>
 }

@@ -13,13 +13,14 @@ export class FacebookAuthenticationService {
     private readonly tokenGenerator: TokenGenerator
   ) {}
 
-  async exec (params: FacebookAuthentication.Params): Promise<AuthenticationError> {
+  async exec (params: FacebookAuthentication.Params): Promise<FacebookAuthentication.Result> {
     const fbUser = await this.loadFacebookUserByTokenApi.loadUser({ token: params.token })
     if (fbUser !== undefined) {
       const accountData = await this.loadUserAccountRepository.load({ email: fbUser.email })
       const fbAccount = new FacebookAccount(fbUser, accountData)
       const { id } = await this.saveFacebookUserAccountRepository.saveWithFacebook(fbAccount)
-      await this.tokenGenerator.generate({ key: id, expirationInMs: AccessToken.expirationInMs })
+      const token = await this.tokenGenerator.generate({ key: id, expirationInMs: AccessToken.expirationInMs })
+      return new AccessToken(token)
     }
     return new AuthenticationError()
   }

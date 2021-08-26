@@ -46,6 +46,7 @@ describe('FacebookAuthenticationService', () => {
     saveFacebookUserAccountRepository.saveWithFacebook.mockResolvedValue({
       id: 'any_account_id'
     })
+    tokenGenerator.generate.mockResolvedValue('any_generated_token')
     sut = new FacebookAuthenticationService(loadFacebookUserApi, loadUserAccountRepository, saveFacebookUserAccountRepository, tokenGenerator)
   })
 
@@ -91,7 +92,7 @@ describe('FacebookAuthenticationService', () => {
     expect(saveFacebookUserAccountRepository.saveWithFacebook).toHaveBeenCalledTimes(1)
   })
 
-  it('shout call TokenGenerator with correct params', async () => {
+  it('should call TokenGenerator with correct params', async () => {
     loadUserAccountRepository.load.mockResolvedValueOnce(undefined)
 
     await sut.exec({ token })
@@ -101,5 +102,13 @@ describe('FacebookAuthenticationService', () => {
       expirationInMs: AccessToken.expirationInMs
     })
     expect(tokenGenerator.generate).toHaveBeenCalledTimes(1)
+  })
+
+  it('should return an AccessToken on success', async () => {
+    loadUserAccountRepository.load.mockResolvedValueOnce(undefined)
+
+    const resultSut = await sut.exec({ token })
+
+    expect(resultSut).toEqual(new AccessToken('any_generated_token'))
   })
 })
