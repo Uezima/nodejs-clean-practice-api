@@ -1,5 +1,5 @@
 import { AuthenticationError } from '@/domain/errors'
-import { FacebookAccount } from '@/domain/models'
+import { AccessToken, FacebookAccount } from '@/domain/models'
 import { TokenGenerator } from '@/data/contracts/crypto'
 import { FacebookAuthenticationService } from '@/data/services/'
 import { LoadUserAccountRepository, SaveFacebookUserAccountRepository } from '@/data/contracts/repos'
@@ -97,7 +97,8 @@ describe('FacebookAuthenticationService', () => {
     await sut.exec({ token })
 
     expect(tokenGenerator.generate).toHaveBeenCalledWith({
-      key: 'any_account_id'
+      key: 'any_account_id',
+      expirationInMs: AccessToken.expirationInMs
     })
     expect(tokenGenerator.generate).toHaveBeenCalledTimes(1)
   })
