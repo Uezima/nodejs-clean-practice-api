@@ -5,7 +5,7 @@ import { AuthenticationError } from '@/domain/errors'
 import { AccessToken, FacebookAccount } from '@/domain/models'
 import { TokenGenerator } from '@/data/contracts/crypto'
 
-export class FacebookAuthenticationService {
+export class FacebookAuthenticationService implements FacebookAuthentication {
   constructor (
     private readonly loadFacebookUserByTokenApi: LoadFacebookUserApi,
     private readonly loadUserAccountRepository: LoadUserAccountRepository,
