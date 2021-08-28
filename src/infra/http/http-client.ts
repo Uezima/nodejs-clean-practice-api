@@ -2,13 +2,11 @@ export interface HttpClient {
   get: (params: HttpClient.Params) => Promise<HttpClient.Result>
 }
 
-namespace HttpClient {
+export namespace HttpClient {
   export type Params = {
     url: string
     params: object
   }
 
-  export type Result = {
-    response: string
-  }
+  export type Result = any
 }

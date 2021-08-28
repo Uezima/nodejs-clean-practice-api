@@ -2,7 +2,8 @@ import { HttpClient } from '@/infra/http'
 import { LoadFacebookUserApi } from '@/data/contracts/apis'
 
 export class FacebookApi {
-  baseUrl: string = 'https://graph.facebook.com'
+  private readonly baseUrl: string = 'https://graph.facebook.com'
+  private readonly grantType: string = 'client_credentials'
 
   constructor (
     private readonly httpClient: HttpClient,
@@ -11,12 +12,23 @@ export class FacebookApi {
   ) {}
 
   async loadUser (params: LoadFacebookUserApi.Params): Promise<void> {
-    await this.httpClient.get({
+    const token = await this.httpClient.get({
       url: `${this.baseUrl}/oauth/access_token`,
       params: {
-        clientId: this.clientId,
-        clientSecret: this.clientSecret
+        client_id: this.clientId,
+        client_secret: this.clientSecret,
+        grant_type: this.grantType
       }
     })
+
+    if (token !== undefined) {
+      await this.httpClient.get({
+        url: `${this.baseUrl}/debug_token`,
+        params: {
+          access_token: token.access_token,
+          input_token: params.token
+        }
+      })
+    }
   }
 }
