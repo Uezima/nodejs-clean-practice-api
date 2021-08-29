@@ -1,18 +1,19 @@
 import { HttpClient } from '@/infra/http'
 
-import axios, { AxiosStatic } from 'axios'
+import axios from 'axios'
 
 jest.mock('axios')
 
 class AxiosHttpClient {
-  async get (params: HttpClient.Params): Promise<any> {
-    await axios.get(params.url, { params: params.params })
+  async get <T = any>(params: HttpClient.Params): Promise<T> {
+    const result = await axios.get(params.url, { params: params.params })
+    return result.data
   }
 }
 
 describe('AxiosHttpClient', () => {
   let sut: AxiosHttpClient
-  let fakeAxios: AxiosStatic
+  let fakeAxios: jest.Mocked<typeof axios>
   let url: string
   let params: object
 
@@ -22,6 +23,10 @@ describe('AxiosHttpClient', () => {
       any: 'any'
     }
     fakeAxios = axios as jest.Mocked<typeof axios>
+    fakeAxios.get.mockResolvedValue({
+      status: 200,
+      data: 'any_data'
+    })
   })
 
   beforeEach(() => {
@@ -34,6 +39,12 @@ describe('AxiosHttpClient', () => {
 
       expect(fakeAxios.get).toHaveBeenCalledTimes(1)
       expect(fakeAxios.get).toHaveBeenCalledWith(url, { params })
+    })
+
+    it('should call axios with correct parameteres', async () => {
+      const result = await sut.get({ url: 'any_url', params })
+
+      expect(result).toEqual('any_data')
     })
   })
 })
